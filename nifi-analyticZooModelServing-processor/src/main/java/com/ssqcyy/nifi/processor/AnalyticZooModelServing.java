@@ -24,7 +24,7 @@ import java.util.Set;
 import org.apache.nifi.annotation.behavior.InputRequirement;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
-import org.apache.nifi.annotation.lifecycle.OnAdded;
+import org.apache.nifi.annotation.lifecycle.OnScheduled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.logging.ComponentLog;
@@ -51,6 +51,11 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 			.displayName("Item Id").description("The itemId for model serving.")
 			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
 			.build();
+	
+	public static final PropertyDescriptor MODEL_FILE_PATH = new PropertyDescriptor.Builder().name("model-file-path")
+			.displayName("Model File Path").description("The path of model file")
+			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
+			.build();
 
 	public static final Relationship REL_SUCCESS = new Relationship.Builder().name("success")
 			.description("FlowFiles that are successfully processed are sent to this relationship").build();
@@ -68,6 +73,7 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 		List<PropertyDescriptor> properties = new ArrayList<>();
 		properties.add(USER_ID);
 		properties.add(ITEM_ID);
+		properties.add(MODEL_FILE_PATH);
 		this.properties = Collections.unmodifiableList(properties);
 
 		Set<Relationship> relationships = new HashSet<>();
@@ -105,10 +111,10 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 
 	}
 
-	@OnAdded
-	public void initModel() {
-		String modelPath = System.getProperty("MODEL_PATH", "/opt/work/demo.model");
+	@OnScheduled
+	public void initModel(final ProcessContext context) {
 		rcm = new NueralCFModel();
+		String modelPath = context.getProperty(MODEL_FILE_PATH).getValue(); 
 		rcm.load(modelPath);
 	}
 
