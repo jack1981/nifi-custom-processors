@@ -113,9 +113,18 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 
 	@OnScheduled
 	public void initModel(final ProcessContext context) {
-		rcm = new NueralCFModel();
-		String modelPath = context.getProperty(MODEL_FILE_PATH).getValue(); 
-		rcm.load(modelPath);
+		final ComponentLog log = getLogger();
+		try {
+			rcm = new NueralCFModel();
+			String modelPath = context.getProperty(MODEL_FILE_PATH).getValue(); 
+			log.info("model path is "+modelPath);
+			rcm.load(modelPath);
+		}
+		catch (Exception e) {
+			log.error("Failure init model {} due to {}, raise the exception",
+					new Object[] { rcm, e.getMessage() }, e);
+		}
+
 	}
 
 	@Override
