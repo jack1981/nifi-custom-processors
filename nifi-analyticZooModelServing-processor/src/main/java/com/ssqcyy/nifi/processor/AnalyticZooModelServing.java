@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.math3.util.Precision;
 import org.apache.nifi.annotation.behavior.InputRequirement;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
@@ -102,10 +104,8 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 
 	private UserItemPair createPairFromContext(ProcessContext context, FlowFile flowfile) {
 
-		Float userId = Float
-				.parseFloat(context.getProperty(USER_ID).evaluateAttributeExpressions(flowfile).getValue());
-		Float itemId = Float
-				.parseFloat(context.getProperty(ITEM_ID).evaluateAttributeExpressions(flowfile).getValue());
+		Float userId = Float.parseFloat(context.getProperty(USER_ID).evaluateAttributeExpressions(flowfile).getValue());
+		Float itemId = Float.parseFloat(context.getProperty(ITEM_ID).evaluateAttributeExpressions(flowfile).getValue());
 		UserItemPair pair = new UserItemPair(userId, itemId);
 		return pair;
 
@@ -141,13 +141,15 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 		try {
 			List<List<JTensor>> jts = rcm.preProcess(userItemPairs);
 			List<List<JTensor>> finalResult = rcm.predict(jts);
-			log.debug("Predict Result : " + finalResult.get(0).get(0).getData()[0]);
+			JTensor jtensor = finalResult.get(0).get(0);
+			Double prob = Precision.round((1.0 / (1.0 + Math.exp(jtensor.getData()[1] - jtensor.getData()[0]))) * 1000,
+					3);
+			log.debug("Predict Result : " + prob);
 			if (finalResult.isEmpty()) {
 				session.transfer(flowFile, REL_FAILURE);
 			} else {
 				try {
-					flowFile = session.putAttribute(flowFile, "score",
-							Float.toString(finalResult.get(0).get(0).getData()[0]));
+					flowFile = session.putAttribute(flowFile, "score", Double.toString(prob));
 					session.transfer(flowFile, REL_SUCCESS);
 				} catch (Exception e) {
 					log.error("Returned an error" + e.getMessage());
