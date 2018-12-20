@@ -51,7 +51,7 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 			.displayName("Item Id").description("The itemId for model serving.")
 			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
 			.build();
-	
+
 	public static final PropertyDescriptor MODEL_FILE_PATH = new PropertyDescriptor.Builder().name("model-file-path")
 			.displayName("Model File Path").description("The path of model file")
 			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
@@ -102,10 +102,10 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 
 	private UserItemPair createPairFromContext(ProcessContext context, FlowFile flowfile) {
 
-		Integer userId = Integer
-				.parseInt(context.getProperty(USER_ID).evaluateAttributeExpressions(flowfile).getValue());
-		Integer itemId = Integer
-				.parseInt(context.getProperty(ITEM_ID).evaluateAttributeExpressions(flowfile).getValue());
+		Float userId = Float
+				.parseFloat(context.getProperty(USER_ID).evaluateAttributeExpressions(flowfile).getValue());
+		Float itemId = Float
+				.parseFloat(context.getProperty(ITEM_ID).evaluateAttributeExpressions(flowfile).getValue());
 		UserItemPair pair = new UserItemPair(userId, itemId);
 		return pair;
 
@@ -116,13 +116,11 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 		final ComponentLog log = getLogger();
 		try {
 			rcm = new NueralCFModel();
-			String modelPath = context.getProperty(MODEL_FILE_PATH).getValue(); 
-			log.info("model path is "+modelPath);
+			String modelPath = context.getProperty(MODEL_FILE_PATH).getValue();
+			log.info("model path is " + modelPath);
 			rcm.load(modelPath);
-		}
-		catch (Exception e) {
-			log.error("Failure init model {} due to {}, raise the exception",
-					new Object[] { rcm, e.getMessage() }, e);
+		} catch (Exception e) {
+			log.error("Failure init model {} due to {}, raise the exception", new Object[] { rcm, e.getMessage() }, e);
 		}
 
 	}
