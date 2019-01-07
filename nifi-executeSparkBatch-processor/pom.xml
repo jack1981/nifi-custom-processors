@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.ssqcyy.nifi</groupId>
+		<groupId>com.ssqcyy</groupId>
 		<artifactId>nifi-custom-processors</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
