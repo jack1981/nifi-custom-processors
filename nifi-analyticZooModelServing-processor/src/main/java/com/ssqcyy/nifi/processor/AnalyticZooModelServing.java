@@ -58,6 +58,11 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 			.displayName("Model File Path").description("The path of model file")
 			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
 			.build();
+	
+	public static final PropertyDescriptor WEIGHT_FILE_PATH = new PropertyDescriptor.Builder().name("weight-file-path")
+			.displayName("Weight File Path").description("The path of model weight file")
+			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).required(true).expressionLanguageSupported(true)
+			.build();
 
 	public static final Relationship REL_SUCCESS = new Relationship.Builder().name("success")
 			.description("FlowFiles that are successfully processed are sent to this relationship").build();
@@ -76,6 +81,7 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 		properties.add(USER_ID);
 		properties.add(ITEM_ID);
 		properties.add(MODEL_FILE_PATH);
+		properties.add(WEIGHT_FILE_PATH);
 		this.properties = Collections.unmodifiableList(properties);
 
 		Set<Relationship> relationships = new HashSet<>();
@@ -117,8 +123,9 @@ public class AnalyticZooModelServing extends AbstractProcessor {
 		try {
 			rcm = new NueralCFModel();
 			String modelPath = context.getProperty(MODEL_FILE_PATH).getValue();
-			log.info("model path is " + modelPath);
-			rcm.load(modelPath);
+			String weightPath = context.getProperty(WEIGHT_FILE_PATH).getValue();
+			log.info("model path is " + modelPath+" WEIGHT path is " + weightPath);
+			rcm.load(modelPath, weightPath);
 		} catch (Exception e) {
 			log.error("Failure init model {} due to {}, raise the exception", new Object[] { rcm, e.getMessage() }, e);
 		}
