@@ -252,7 +252,7 @@ public class ExecuteSparkBatch extends AbstractProcessor {
 		SparkBatchPojo pojo = createPojoFromContext(context, flowFile);
 		Gson gson = new Gson();
 		String payload = gson.toJson(pojo);
-		// getLogger().info(payload);
+		getLogger().info(payload);
 		String livyUrl = context.getProperty(LIVY_URL).evaluateAttributeExpressions(flowFile).getValue();
 		try {
 			final JSONObject result = submitAndHandleJob(livyUrl, payload, statusCheckInterval, context,
